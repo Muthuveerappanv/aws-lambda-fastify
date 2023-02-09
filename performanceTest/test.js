@@ -11,7 +11,6 @@ const event = {
   requestContext: { requestId: 'requestId' },
   queryStringParameters: ''
 }
-
 // @fastify/aws-lambda stuff:
 const awsLambdaFastify = require('../index')
 const appAwsLambdaFastify = fastify()
@@ -39,6 +38,10 @@ const appServerlessHttp = fastify()
 appServerlessHttp.get('/test', async () => ({ hello: 'world' }))
 const serverlessHttpProxy = serverlessHttp(appServerlessHttp)
 
+const lambdaApi = require('lambda-api')();
+lambdaApi.get('/test', async () => ({ hello: 'world' }))
+
+
 suite
   .add('aws-serverless-express', (deferred) => {
     appAwsServerlessExpress.ready(() => {
@@ -64,6 +67,10 @@ suite
 
   .add('aws-lambda-fastify (decorateRequest : false)', (deferred) => {
     proxy(event, { decorateRequest: false }, () => deferred.resolve())
+  }, { defer: true })
+
+  .add('lambda-api (decorateRequest : false)', (deferred) => {
+    lambdaApi.run(event, { decorateRequest: false }, () => deferred.resolve())
   }, { defer: true })
 
   .on('cycle', (event) => {
